@@ -33,18 +33,13 @@ export async function getTicketsType(req: AuthenticatedRequest, res: Response) {
 
 export async function postTickets(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
-  const { typeId } = req.body;
+  const { ticketTypeId } = req.body;
 
   try {
-    if (!userId) {
-      return res.sendStatus(httpStatus.UNAUTHORIZED);
-    }
-
-    if (!typeId) {
+    if (!ticketTypeId) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
-
-    const ticket = await serviceTickets.createUser(userId, typeId);
+    const ticket = await serviceTickets.createUser(userId, ticketTypeId);
     return res.status(httpStatus.CREATED).send(ticket);
   } catch (err) {
     return res.sendStatus(httpStatus.NOT_FOUND);
