@@ -1,14 +1,13 @@
-//import { TicketStatus } from '@prisma/client';
 import { unauthorizedError } from '@/errors';
 import ticketsRepository from '@/repositories/tickets-repository';
 import paymentsRepositories, { PaymentType } from '@/repositories/payment-repository';
 
-async function makePayment(ticketId: number, userId: number, cardData: PaymentType) {
-  const tType = await ticketsRepository.getUsersTicketWithType(ticketId);
+async function createPayment(ticketId: number, cardData: PaymentType) {
+  const ticketType = await ticketsRepository.getUsersTicketWithType(ticketId);
 
   const paymentInfo = {
     ticketId,
-    value: tType.TicketType.price,
+    value: ticketType.TicketType.price,
     cardIssuer: cardData.cardIssuer,
     cardLastDigits: cardData.cardLastDigits.slice(-4),
   };
@@ -29,7 +28,7 @@ async function getPaymentFromTicketId(ticketId: number) {
 }
 
 const paymentService = {
-  makePayment,
+  createPayment,
   getPaymentFromTicketId,
 };
 

@@ -30,10 +30,11 @@ export async function postPayment(req: AuthenticatedRequest, res: Response) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
 
-    const newPayment = await paymentsService.makePayment(ticketId, userId, cardData);
+    const newPayment = await paymentsService.createPayment(ticketId, userId);
     if (!newPayment) {
       return res.sendStatus(httpStatus.NOT_FOUND);
     }
+
     return res.status(httpStatus.OK).send(newPayment);
   } catch (err) {
     if (err.name === 'UnauthorizedError') {
