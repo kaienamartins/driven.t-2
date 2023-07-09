@@ -20,11 +20,11 @@ async function createPayment(ticketId: number, cardData: PaymentType) {
 }
 
 async function getPaymentFromTicketId(ticketId: number) {
-  const payments = await paymentsRepositories.getPayment(ticketId);
+  const payment = await paymentsRepositories.getPayment(ticketId);
 
-  if (!payments) throw unauthorizedError();
+  if (!payment) throw unauthorizedError();
 
-  return payments;
+  return payment;
 }
 
 async function checkUserOwnership(userId: number, ticketId: number) {
