@@ -22,7 +22,6 @@ export async function getPayment(req: AuthenticatedRequest, res: Response) {
 }
 
 export async function postPayment(req: AuthenticatedRequest, res: Response) {
-  const { userId } = req;
   const { ticketId, cardData } = req.body;
 
   try {
@@ -30,7 +29,7 @@ export async function postPayment(req: AuthenticatedRequest, res: Response) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
 
-    const newPayment = await paymentsService.createPayment(ticketId, userId);
+    const newPayment = await paymentsService.createPayment(ticketId, cardData);
     if (!newPayment) {
       return res.sendStatus(httpStatus.NOT_FOUND);
     }
