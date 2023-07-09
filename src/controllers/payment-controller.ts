@@ -29,12 +29,17 @@ export async function getPayment(req: AuthenticatedRequest, res: Response) {
   const ticketId = Number(req.query.ticketId) as number;
 
   try {
+    if (!req.userId) {
+      return res.sendStatus(httpStatus.UNAUTHORIZED);
+    }
+
     if (!ticketId) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
+
     const newPayment = await paymentsService.getPaymentFromTicketId(ticketId);
     if (!newPayment) {
-      return res.sendStatus(httpStatus.UNAUTHORIZED);
+      return res.sendStatus(httpStatus.NOT_FOUND);
     }
     return res.status(httpStatus.OK).send(newPayment);
   } catch (err) {

@@ -13,12 +13,21 @@ export async function getTickets(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-export async function getTicketsType(res: Response) {
+export async function getTicketsType(req: AuthenticatedRequest, res: Response) {
   try {
-    const ticketType = await serviceTickets.getTicket();
-    return res.status(httpStatus.OK).send(ticketType);
+    if (!req.userId) {
+      return res.sendStatus(httpStatus.UNAUTHORIZED);
+    }
+
+    const ticketTypes = await serviceTickets.getTicket();
+
+    if (!ticketTypes || ticketTypes.length === 0) {
+      return res.status(httpStatus.OK).send([]);
+    }
+
+    return res.status(httpStatus.OK).send(ticketTypes);
   } catch (err) {
-    return res.sendStatus(httpStatus.NO_CONTENT);
+    return res.sendStatus(httpStatus.UNAUTHORIZED);
   }
 }
 
@@ -27,9 +36,14 @@ export async function postTickets(req: AuthenticatedRequest, res: Response) {
   const { typeId } = req.body;
 
   try {
+    if (!userId) {
+      return res.sendStatus(httpStatus.UNAUTHORIZED);
+    }
+
     if (!typeId) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
+
     const ticket = await serviceTickets.createUser(userId, typeId);
     return res.status(httpStatus.CREATED).send(ticket);
   } catch (err) {
