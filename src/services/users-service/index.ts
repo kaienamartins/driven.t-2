@@ -14,6 +14,7 @@ export async function createUser({ email, password }: CreateUserParams): Promise
   return userRepository.create({
     email,
     password: hashedPassword,
+    updatedAt: new Date(),
   });
 }
 

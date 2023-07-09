@@ -1,6 +1,6 @@
 import { Address, Enrollment } from '@prisma/client';
 import { request } from '@/utils/request';
-import { invalidDataError, notFoundError } from '@/errors';
+import { notFoundError } from '@/errors';
 import addressRepository, { CreateAddressParams } from '@/repositories/address-repository';
 import enrollmentRepository, { CreateEnrollmentParams } from '@/repositories/enrollment-repository';
 import { exclude } from '@/utils/prisma-utils';
@@ -31,7 +31,10 @@ async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddr
 
   if (!enrollmentWithAddress) throw notFoundError();
 
-  const [firstAddress] = enrollmentWithAddress.Address;
+  const [firstAddress] = Array.isArray(enrollmentWithAddress.Address)
+    ? enrollmentWithAddress.Address
+    : [enrollmentWithAddress.Address];
+
   const address = getFirstAddress(firstAddress);
 
   return {
@@ -68,9 +71,9 @@ function getAddressForUpsert(address: CreateAddressParams) {
   };
 }
 
-export type CreateOrUpdateEnrollmentWithAddress = CreateEnrollmentParams & {
+export interface CreateOrUpdateEnrollmentWithAddress extends CreateEnrollmentParams {
   address: CreateAddressParams;
-};
+}
 
 const enrollmentsService = {
   getOneWithAddressByUserId,

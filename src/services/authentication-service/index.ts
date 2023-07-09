@@ -33,6 +33,7 @@ async function createSession(userId: number) {
   await sessionRepository.create({
     token,
     userId,
+    updatedAt: new Date(),
   });
 
   return token;
