@@ -4,7 +4,7 @@ import { AuthenticatedRequest } from '@/middlewares';
 import paymentsService from '@/services/payment-service';
 
 export async function getPayment(req: AuthenticatedRequest, res: Response) {
-  const ticketId = Number(req.query.ticketId) as number;
+  const ticketId = Number(req.query.ticketId);
 
   try {
     if (!ticketId) {
@@ -12,9 +12,11 @@ export async function getPayment(req: AuthenticatedRequest, res: Response) {
     }
 
     const newPayment = await paymentsService.getPaymentFromTicketId(ticketId);
+
     if (!newPayment) {
       return res.sendStatus(httpStatus.UNAUTHORIZED);
     }
+
     return res.status(httpStatus.OK).send(newPayment);
   } catch (err) {
     return res.sendStatus(httpStatus.NOT_FOUND);
@@ -29,16 +31,20 @@ export async function postPayment(req: AuthenticatedRequest, res: Response) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
     }
 
+    const isUserAuthorized = await paymentsService.checkUserOwnership(req.userId, ticketId);
+
+    if (!isUserAuthorized) {
+      return res.sendStatus(httpStatus.UNAUTHORIZED);
+    }
+
     const newPayment = await paymentsService.createPayment(ticketId, cardData);
+
     if (!newPayment) {
       return res.sendStatus(httpStatus.NOT_FOUND);
     }
 
     return res.status(httpStatus.OK).send(newPayment);
   } catch (err) {
-    if (err.name === 'UnauthorizedError') {
-      return res.sendStatus(httpStatus.UNAUTHORIZED);
-    }
     return res.sendStatus(httpStatus.NOT_FOUND);
   }
 }

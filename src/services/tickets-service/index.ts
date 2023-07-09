@@ -38,10 +38,19 @@ async function getTicket() {
   return ticketType;
 }
 
+async function checkUserEnrollment(userId: number) {
+  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+
+  if (!enrollment) throw notFoundError();
+
+  return enrollment;
+}
+
 const serviceTickets = {
   createUser,
   getUser,
   getTicket,
+  checkUserEnrollment,
 };
 
 export default serviceTickets;

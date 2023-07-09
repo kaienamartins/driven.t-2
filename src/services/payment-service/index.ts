@@ -1,9 +1,9 @@
 import { unauthorizedError } from '@/errors';
-import ticketsRepository from '@/repositories/tickets-repository';
+import repTickets from '@/repositories/tickets-repository';
 import paymentsRepositories, { PaymentType } from '@/repositories/payment-repository';
 
 async function createPayment(ticketId: number, cardData: PaymentType) {
-  const ticketType = await ticketsRepository.getUsersTicketWithType(ticketId);
+  const ticketType = await repTickets.getUsersTicketWithType(ticketId);
 
   const paymentInfo = {
     ticketId,
@@ -14,7 +14,7 @@ async function createPayment(ticketId: number, cardData: PaymentType) {
 
   const payment = await paymentsRepositories.postPayment(ticketId, paymentInfo);
 
-  await ticketsRepository.ticketsPayment(ticketId);
+  await repTickets.ticketsPayment(ticketId);
 
   return payment;
 }
@@ -27,9 +27,18 @@ async function getPaymentFromTicketId(ticketId: number) {
   return payments;
 }
 
+async function checkUserOwnership(userId: number, ticketId: number) {
+  const ticket = await repTickets.getUsersTicketWithType(ticketId);
+
+  if (ticket.enrollmentId !== userId) throw unauthorizedError();
+
+  return true;
+}
+
 const paymentService = {
   createPayment,
   getPaymentFromTicketId,
+  checkUserOwnership,
 };
 
 export default paymentService;

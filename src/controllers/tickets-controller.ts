@@ -10,6 +10,12 @@ export async function getTickets(req: AuthenticatedRequest, res: Response) {
       return res.sendStatus(httpStatus.UNAUTHORIZED);
     }
 
+    const hasEnrollment = await serviceTickets.checkUserEnrollment(userId);
+
+    if (!hasEnrollment) {
+      return res.sendStatus(httpStatus.NOT_FOUND);
+    }
+
     const ticket = await serviceTickets.getUser(userId);
 
     if (!ticket) {
@@ -51,6 +57,12 @@ export async function postTickets(req: AuthenticatedRequest, res: Response) {
 
     if (!ticketTypeId) {
       return res.sendStatus(httpStatus.BAD_REQUEST);
+    }
+
+    const hasEnrollment = await serviceTickets.checkUserEnrollment(userId);
+
+    if (!hasEnrollment) {
+      return res.sendStatus(httpStatus.NOT_FOUND);
     }
 
     const ticket = await serviceTickets.createUser(userId, ticketTypeId);
