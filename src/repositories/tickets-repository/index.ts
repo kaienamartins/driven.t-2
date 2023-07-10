@@ -1,14 +1,17 @@
 import { Enrollment } from '@prisma/client';
 import { prisma } from '../../config';
+import { notFoundError } from '@/errors';
 
 async function getTicketType() {
-  return await prisma.ticketType.findMany();
+  const ticketTypes = await prisma.ticketType.findMany();
+  return ticketTypes;
 }
 
 async function getTicketTypeById(ticketTypeId: number) {
-  return await prisma.ticketType.findFirst({
+  const ticketType = await prisma.ticketType.findFirst({
     where: { id: ticketTypeId },
   });
+  return ticketType;
 }
 
 async function user(userId: number) {
@@ -41,23 +44,34 @@ async function user(userId: number) {
 }
 
 async function getUser(userId: number) {
-  return await prisma.user.findFirst({
+  const user = await prisma.user.findFirst({
     where: {
       id: userId,
     },
+    include: {
+      Enrollment: true,
+    },
   });
+  return user;
 }
 
-async function checkEnrollment(userId: number): Promise<Enrollment> {
-  return await prisma.enrollment.findFirst({
+async function checkEnrollment(userId: number): Promise<Enrollment | null> {
+  const enrollment = await prisma.enrollment.findFirst({
     where: {
       userId,
     },
   });
+  return enrollment;
 }
 
 async function createTicket(ticketTypeId: number, enrollmentId: number) {
-  return await prisma.ticket.create({
+  const checkEnrollmentResult = await checkEnrollment(enrollmentId);
+
+  if (!checkEnrollmentResult) {
+    throw notFoundError();
+  }
+
+  const ticket = await prisma.ticket.create({
     data: {
       enrollmentId,
       ticketTypeId,
@@ -67,16 +81,19 @@ async function createTicket(ticketTypeId: number, enrollmentId: number) {
       TicketType: true,
     },
   });
+
+  return ticket;
 }
 
 async function getTicketById(ticketId: string | number) {
-  return await prisma.ticket.findFirst({
+  const ticket = await prisma.ticket.findFirst({
     where: { id: Number(ticketId) },
   });
+  return ticket;
 }
 
 async function updateTicket(ticketId: number) {
-  return await prisma.ticket.update({
+  const updatedTicket = await prisma.ticket.update({
     where: {
       id: ticketId,
     },
@@ -84,6 +101,7 @@ async function updateTicket(ticketId: number) {
       status: 'PAID',
     },
   });
+  return updatedTicket;
 }
 
 const repTickets = {

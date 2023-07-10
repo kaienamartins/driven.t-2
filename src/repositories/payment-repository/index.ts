@@ -1,4 +1,4 @@
-import { prisma } from '../../config';
+import { prisma } from '@/config';
 import { Payment } from '@/protocols';
 
 async function getPayment(ticketId: number) {
