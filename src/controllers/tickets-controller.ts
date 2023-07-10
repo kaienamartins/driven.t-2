@@ -22,7 +22,7 @@ export async function postTicket(req: AuthenticatedRequest, res: Response) {
       return res.sendStatus(httpStatus.NOT_FOUND);
     }
 
-    return res.sendStatus(httpStatus.CREATED);
+    return res.status(httpStatus.CREATED).send(result);
   } catch (err) {
     return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -37,10 +37,6 @@ export async function getTicket(_req: AuthenticatedRequest, res: Response) {
     }
 
     const tickets = await serviceTickets.getTicketType();
-
-    if (tickets.length === 0) {
-      return res.status(httpStatus.OK).send([]);
-    }
 
     return res.status(httpStatus.OK).send(tickets);
   } catch (err) {
