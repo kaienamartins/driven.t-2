@@ -31,10 +31,7 @@ async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddr
 
   if (!enrollmentWithAddress) throw notFoundError();
 
-  const [firstAddress] = Array.isArray(enrollmentWithAddress.Address)
-    ? enrollmentWithAddress.Address
-    : [enrollmentWithAddress.Address];
-
+  const [firstAddress] = enrollmentWithAddress.Address;
   const address = getFirstAddress(firstAddress);
 
   return {
@@ -71,9 +68,9 @@ function getAddressForUpsert(address: CreateAddressParams) {
   };
 }
 
-export interface CreateOrUpdateEnrollmentWithAddress extends CreateEnrollmentParams {
+export type CreateOrUpdateEnrollmentWithAddress = CreateEnrollmentParams & {
   address: CreateAddressParams;
-}
+};
 
 const enrollmentsService = {
   getOneWithAddressByUserId,

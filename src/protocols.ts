@@ -51,7 +51,7 @@ export type Payment = {
     issuer: string;
     number: number;
     name: string;
-    expirationDate: Date;
+    expirationDate: string;
     cvv: number;
   };
 };

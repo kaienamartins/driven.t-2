@@ -5,7 +5,7 @@ import ticketsServices from '@/services/tickets-service';
 
 export async function getTicketType(req: AuthenticatedRequest, res: Response) {
   try {
-    const result = await ticketsServices.getTicketsTypes();
+    const result = await ticketsServices.getTicketType();
 
     return res.status(httpStatus.OK).send(result);
   } catch (error) {
@@ -13,7 +13,7 @@ export async function getTicketType(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-export async function getTickets(req: AuthenticatedRequest, res: Response) {
+export async function getTicket(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
   try {
     const tickets = await ticketsServices.getTickets(userId);
@@ -24,7 +24,7 @@ export async function getTickets(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-export async function postTickets(req: AuthenticatedRequest, res: Response) {
+export async function postTicket(req: AuthenticatedRequest, res: Response) {
   const { userId } = req;
   const { ticketTypeId } = req.body;
 

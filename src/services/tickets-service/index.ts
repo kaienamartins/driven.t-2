@@ -2,7 +2,7 @@ import httpStatus from 'http-status';
 import enrollmentRepository from '@/repositories/enrollment-repository';
 import ticketsRepository from '@/repositories/tickets-repository';
 
-async function getTicketsTypes() {
+async function getTicketType() {
   const result = await ticketsRepository.getTicketType();
   return result;
 }
@@ -14,30 +14,42 @@ async function getTicketsTypeById(ticketTypeId: number) {
 
 async function getTickets(userId: number) {
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-  if (!enrollment) throw { type: 'application', error: httpStatus.NOT_FOUND, message: 'Enrollment not found' };
+  if (!enrollment) {
+    return { error: httpStatus.NOT_FOUND };
+  }
 
   const tickets = await ticketsRepository.getTickets(enrollment.id);
-  if (!tickets) throw { type: 'application', error: httpStatus.NOT_FOUND, message: 'user doesnt have any ticket' };
+  if (!tickets) {
+    return { error: httpStatus.NOT_FOUND };
+  }
 
   return tickets;
 }
 
 async function getAllTickets(userId: number) {
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-  if (!enrollment) throw { type: 'application', error: httpStatus.UNAUTHORIZED, message: 'user doesnt own ticket' };
+  if (!enrollment) {
+    return { error: httpStatus.UNAUTHORIZED };
+  }
 
   const tickets = await ticketsRepository.getTickets(enrollment.id);
-  if (!tickets) throw { type: 'application', error: httpStatus.UNAUTHORIZED, message: 'user doesnt own ticket' };
+  if (!tickets) {
+    return { error: httpStatus.UNAUTHORIZED };
+  }
 
   return tickets;
 }
 
 async function postTickets(userId: number, ticketTypeId: number) {
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-  if (!enrollment) throw { type: 'application', error: httpStatus.NOT_FOUND };
+  if (!enrollment) {
+    return { error: httpStatus.NOT_FOUND };
+  }
 
   const type = await getTicketsTypeById(ticketTypeId);
-  if (!type) throw { type: 'application', error: httpStatus.NOT_FOUND };
+  if (!type) {
+    return { error: httpStatus.NOT_FOUND };
+  }
 
   const ticket = await ticketsRepository.postTicket(enrollment.id, ticketTypeId);
 
@@ -47,13 +59,15 @@ async function postTickets(userId: number, ticketTypeId: number) {
 async function getTicketById(ticketId: number) {
   const ticket = await ticketsRepository.getTicketById(ticketId);
   console.log(ticket);
-  if (!ticket) throw { type: 'application', error: httpStatus.NOT_FOUND, message: 'ticket doesnt exist' };
+  if (!ticket) {
+    return { error: httpStatus.NOT_FOUND };
+  }
 
   return ticket;
 }
 
 const ticketsServices = {
-  getTicketsTypes,
+  getTicketType,
   getTickets,
   postTickets,
   getTicketById,
