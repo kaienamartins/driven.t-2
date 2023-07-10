@@ -1,8 +1,8 @@
 import { NextFunction, Response } from 'express';
 import httpStatus from 'http-status';
 import { AuthenticatedRequest } from '@/middlewares/authentication-middleware';
+import { Payment } from '@/protocols';
 import paymentsService from '@/services/payment-service';
-import { Payment } from '@/protocol';
 
 export async function getPayment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { ticketId } = req.query;
@@ -10,6 +10,7 @@ export async function getPayment(req: AuthenticatedRequest, res: Response, next:
   if (!ticketId) res.sendStatus(httpStatus.BAD_REQUEST);
   try {
     const result = await paymentsService.getPayment(Number(ticketId), userId);
+
     res.status(httpStatus.OK).send(result);
   } catch (err) {
     next(err);
@@ -29,10 +30,3 @@ export async function postPayment(req: AuthenticatedRequest, res: Response, next
     next(err);
   }
 }
-
-const paymentsController = {
-  getPayment,
-  postPayment,
-};
-
-export default paymentsController;

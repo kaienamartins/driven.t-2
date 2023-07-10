@@ -1,5 +1,5 @@
 import { notFoundError, unauthorizedError } from '@/errors';
-import { Payment } from '@/protocol';
+import { Payment } from '@/protocols';
 
 import repTickets from '@/repositories/tickets-repository';
 import paymentsRepositories from '@/repositories/payment-repository';
