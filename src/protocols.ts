@@ -45,24 +45,6 @@ export type RequestError = {
   message: string;
 };
 
-export type TicketObject = {
-  id: number;
-  status: string;
-  ticketTypeId: number;
-  enrollmentId: number;
-  TicketType: {
-    id: number;
-    name: string;
-    price: number;
-    isRemote: boolean;
-    includesHotel: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 export type Payment = {
   ticketId: number;
   cardData: {
@@ -72,4 +54,8 @@ export type Payment = {
     expirationDate: Date;
     cvv: number;
   };
+};
+
+export type TicketId = {
+  ticketId: string;
 };

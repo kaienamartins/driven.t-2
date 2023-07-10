@@ -1,74 +1,37 @@
 import { Response } from 'express';
 import httpStatus from 'http-status';
-import { AuthenticatedRequest } from '../middlewares';
-import serviceTickets from '@/services/tickets-service';
+import { AuthenticatedRequest } from '@/middlewares';
+import ticketsServices from '@/services/tickets-service';
 
-export async function postTicket(req: AuthenticatedRequest, res: Response): Promise<Response> {
-  const { ticketTypeId } = req.body;
-  const userId = req.userId as number;
-
-  if (!req.session) {
-    return res.status(httpStatus.UNAUTHORIZED).send();
-  }
-
+export async function getTicketType(req: AuthenticatedRequest, res: Response) {
   try {
-    const result = await serviceTickets.createTicket(ticketTypeId, userId);
-
-    if (!ticketTypeId) {
-      return res.status(httpStatus.BAD_REQUEST).send();
-    }
-
-    if (!result) {
-      return res.status(httpStatus.NOT_FOUND).send();
-    }
-
-    return res.status(httpStatus.CREATED).send(result);
-  } catch (err) {
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
-  }
-}
-
-export async function getTicket(_req: AuthenticatedRequest, res: Response): Promise<Response> {
-  try {
-    const session = _req.session;
-
-    if (!session) {
-      return res.status(httpStatus.UNAUTHORIZED).send();
-    }
-
-    const tickets = await serviceTickets.getTicketType();
-
-    return res.status(httpStatus.OK).send(tickets);
-  } catch (err) {
-    return res.sendStatus(httpStatus.NO_CONTENT);
-  }
-}
-
-export async function getUser(req: AuthenticatedRequest, res: Response): Promise<Response> {
-  const { userId } = req;
-  try {
-    const session = req.session;
-
-    if (!session) {
-      return res.status(httpStatus.UNAUTHORIZED).send();
-    }
-
-    const result = await serviceTickets.getUser(userId);
-
-    if (!result) {
-      return res.status(httpStatus.NOT_FOUND).send();
-    }
+    const result = await ticketsServices.getTicketsTypes();
 
     return res.status(httpStatus.OK).send(result);
-  } catch (err) {
-    return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
-const ticketsController = {
-  postTicket,
-  getTicket,
-  getUser,
-};
+export async function getTickets(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+  try {
+    const tickets = await ticketsServices.getTickets(userId);
 
-export default ticketsController;
+    return res.status(httpStatus.OK).send(tickets);
+  } catch (error) {
+    return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
+  }
+}
+
+export async function postTickets(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+  const { ticketTypeId } = req.body;
+
+  try {
+    const tickets = await ticketsServices.postTickets(userId, ticketTypeId);
+    return res.status(httpStatus.CREATED).send(tickets);
+  } catch (error) {
+    return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
+  }
+}

@@ -1,32 +1,30 @@
-import { NextFunction, Response } from 'express';
+import { Response } from 'express';
 import httpStatus from 'http-status';
-import { AuthenticatedRequest } from '@/middlewares/authentication-middleware';
-import { Payment } from '@/protocols';
-import paymentsService from '@/services/payment-service';
+import { AuthenticatedRequest } from '@/middlewares';
+import paymentServices from '@/services/payment-service';
+import { TicketId } from '@/protocols';
 
-export async function getPayment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const { ticketId } = req.query;
-  const userId = req.userId as number;
-  if (!ticketId) res.sendStatus(httpStatus.BAD_REQUEST);
+export async function postPayment(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+
   try {
-    const result = await paymentsService.getPayment(Number(ticketId), userId);
+    const payment = await paymentServices.postPayment(userId, req.body);
 
-    res.status(httpStatus.OK).send(result);
-  } catch (err) {
-    next(err);
+    return res.status(httpStatus.OK).send(payment);
+  } catch (error) {
+    return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
-export async function postPayment(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const paymentsInfo = req.body as Payment;
-  const userId = req.userId as number;
+export async function getPayment(req: AuthenticatedRequest, res: Response) {
+  const { userId } = req;
+
+  const { ticketId } = req.query as TicketId;
+
   try {
-    if (!paymentsInfo.cardData || !paymentsInfo.ticketId) res.sendStatus(httpStatus.BAD_REQUEST);
-
-    const result = await paymentsService.postPayment(paymentsInfo, userId);
-
-    res.status(httpStatus.OK).send(result);
-  } catch (err) {
-    next(err);
+    const payment = await paymentServices.getPayment(userId, parseInt(ticketId));
+    return res.status(httpStatus.OK).send(payment);
+  } catch (error) {
+    return res.sendStatus(httpStatus.INTERNAL_SERVER_ERROR);
   }
 }
