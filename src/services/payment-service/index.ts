@@ -1,44 +1,42 @@
-import { unauthorizedError } from '@/errors';
+import { notFoundError, unauthorizedError } from '@/errors';
+import { Payment } from '@/protocol';
+
 import repTickets from '@/repositories/tickets-repository';
-import paymentsRepositories, { PaymentType } from '@/repositories/payment-repository';
+import paymentsRepositories from '@/repositories/payment-repository';
 
-async function createPayment(ticketId: number, cardData: PaymentType) {
-  const ticketType = await repTickets.getUsersTicketWithType(ticketId);
+async function getPayment(ticketId: number, userId: number) {
+  const ticket = await repTickets.getTicketById(ticketId);
 
-  const paymentInfo = {
-    ticketId,
-    value: ticketType.TicketType.price,
-    cardIssuer: cardData.cardIssuer,
-    cardLastDigits: cardData.cardLastDigits.slice(-4),
-  };
+  if (!ticket) throw notFoundError();
 
-  const payment = await paymentsRepositories.postPayment(ticketId, paymentInfo);
+  const enrollment = await repTickets.checkEnrollment(userId);
 
-  await repTickets.ticketsPayment(ticketId);
+  if (enrollment.id !== ticket.enrollmentId) throw unauthorizedError();
 
-  return payment;
-}
-
-async function getPaymentFromTicketId(ticketId: number) {
   const payment = await paymentsRepositories.getPayment(ticketId);
 
-  if (!payment) throw unauthorizedError();
-
   return payment;
 }
 
-async function checkUserOwnership(userId: number, ticketId: number) {
-  const ticket = await repTickets.getUsersTicketWithType(ticketId);
+async function postPayment(paymentsInfo: Payment, userId: number) {
+  const ticket = await repTickets.getTicketById(paymentsInfo.ticketId);
+  if (!ticket) throw notFoundError();
 
-  if (ticket.enrollmentId !== userId) throw unauthorizedError();
+  const enrollment = await repTickets.checkEnrollment(userId);
+  if (enrollment.id !== ticket.enrollmentId) throw unauthorizedError();
 
-  return true;
+  const ticketInfo = await repTickets.getTicketTypeById(ticket.ticketTypeId);
+
+  const postPayment = await paymentsRepositories.postPayment(paymentsInfo, ticketInfo.price);
+
+  await repTickets.updateTicket(ticket.id);
+
+  return postPayment;
 }
 
-const paymentService = {
-  createPayment,
-  getPaymentFromTicketId,
-  checkUserOwnership,
+const paymentsService = {
+  getPayment,
+  postPayment,
 };
 
-export default paymentService;
+export default paymentsService;

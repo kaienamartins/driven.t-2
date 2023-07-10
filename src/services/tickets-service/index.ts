@@ -1,56 +1,30 @@
-import { TicketStatus } from '@prisma/client';
 import { notFoundError } from '@/errors';
-import enrollmentRepository from '@/repositories/enrollment-repository';
 import repTickets from '@/repositories/tickets-repository';
 
-async function createUser(userId: number, ticketTypeId: number) {
-  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-
-  if (!enrollment) throw notFoundError();
-
-  const ticket = {
-    ticketTypeId,
-    enrollmentId: enrollment.id,
-    status: TicketStatus.RESERVED,
-  };
-  await repTickets.createTicket(ticket);
-
-  const NewTicket = await repTickets.getTicketsByEnrollementID(enrollment.id);
-
-  return NewTicket;
+async function getTicketType() {
+  const res = await repTickets.getTicketType();
+  if (!res) throw notFoundError();
+  return res;
 }
 
 async function getUser(userId: number) {
-  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-
-  if (!enrollment) throw notFoundError();
-
-  const ticket = await repTickets.getTicketsByEnrollementID(enrollment.id);
-
-  if (!ticket) throw notFoundError();
-
-  return ticket;
+  const res = await repTickets.getUser(userId);
+  if (!res) throw notFoundError();
+  return res;
 }
 
-async function getTicket() {
-  const ticketType = await repTickets.getTicketsType();
-  if (!ticketType) throw notFoundError();
-  return ticketType;
-}
+async function createTicket(ticketTypeId: number, userId: number) {
+  const checkEnrollment = await repTickets.checkEnrollment(userId);
 
-async function checkUserEnrollment(userId: number) {
-  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+  if (!checkEnrollment) throw notFoundError();
 
-  if (!enrollment) throw notFoundError();
-
-  return enrollment;
+  return await repTickets.createTicket(ticketTypeId, checkEnrollment.id);
 }
 
 const serviceTickets = {
-  createUser,
+  getTicketType,
   getUser,
-  getTicket,
-  checkUserEnrollment,
+  createTicket,
 };
 
 export default serviceTickets;
